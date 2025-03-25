@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Layout, Divider } from "antd";
+import { invoke } from "@tauri-apps/api/core";
 import AsideTop from "./aside/asideTop";
 import AsideMy from "./aside/asideMy";
 import Middle from "./middle/middle";
@@ -22,7 +23,17 @@ const siderStyle = {
 
 function App() {
 	const [inputList, setInputList] = useState([]);
+	const [listId, setListId] = useState([]);
 
+
+	async function handleSelectItem(id) {
+		const list = await invoke("get_my_task", { taskListId: Number(id) });
+		const itemList = list.map((value, index) =>
+			value.task
+		);
+		setInputList(itemList);
+		setListId(id);
+	}
 	const handleAddInput = (value) => {
 		setInputList([...inputList, value]);
 	};
@@ -31,14 +42,14 @@ function App() {
 			<Layout>
 				<Sider style={siderStyle}>
 					<div className="demo-logo-vertical" />
-					<AsideTop />
+					<AsideTop handleSelectItem={handleSelectItem} />
 					<Divider
 						style={{
 							borderColor: "#7cb305",
 							margin: "0px",
 						}}
 					/>
-					<AsideMy />
+					<AsideMy handleSelectItem={handleSelectItem} />
 				</Sider>
 				<Layout>
 					<Content style={{ margin: "24px 16px 0" }}>
@@ -58,7 +69,7 @@ function App() {
 							textAlign: "center",
 						}}
 					>
-						<Bottom onAddInput={handleAddInput} />
+						<Bottom onAddInput={handleAddInput} listId={listId} />
 					</Footer>
 				</Layout>
 			</Layout>

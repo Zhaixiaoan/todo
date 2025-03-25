@@ -12,7 +12,7 @@ const contextMenu = (
 	</Menu>
 );
 
-export default function AsideMy() {
+export default function AsideMy({ handleSelectItem }) {
 	const [editingKey, setEditingKey] = React.useState(null);
 	const [items, setItems] = React.useState(null);
 
@@ -21,7 +21,6 @@ export default function AsideMy() {
 		const fetchData = async () => {
 			try {
 				const responses = await invoke("get_my_items");
-				console.log("请求数据：", responses);
 				const formattedItems = responses.map((item, index) => ({
 					key: item.id,
 					label: item.task_name,
@@ -70,8 +69,7 @@ export default function AsideMy() {
 				is_have: 0,
 			};
 			invoke("update_my_items", { task });
-			console.log("到这里来");
-		} catch (error) {}
+		} catch (error) { }
 	};
 
 	const lastItems = [
@@ -95,7 +93,7 @@ export default function AsideMy() {
 					>
 						{items &&
 							items.map((item) => (
-								<Menu.Item key={item.key} icon={item.icon}>
+								<Menu.Item key={item.key} icon={item.icon} onClick={() => handleSelectItem(item.key)}>
 									{editingKey === item.key ? (
 										<input
 											autoFocus

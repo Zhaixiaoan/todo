@@ -9,7 +9,7 @@ const leftTopItems = [
 	{ key: 3, icon: React.createElement(VideoCameraOutlined), label: "我的" },
 ];
 
-export default function AsideTop() {
+export default function AsideTop({ handleSelectItem }) {
 	return (
 		<Menu
 			theme="light"
@@ -17,6 +17,7 @@ export default function AsideTop() {
 			defaultSelectedKeys={["left-top-1"]}
 			style={{ height: "25vh" }}
 			items={leftTopItems}
+			onClick={(item) => handleSelectItem(item.key)}
 		/>
 	);
 }

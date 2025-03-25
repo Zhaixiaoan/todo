@@ -64,7 +64,7 @@ fn update_my_items(task: TaskList, state: tauri::State<AppState>) {
 
 #[tauri::command]
 fn add_my_task(task: String, task_list_id: u64, state: tauri::State<AppState>) {
-    info!("从前端接收到的输入内容: {}，id为{}", task, task_list_id);
+    info!("从前端接收到的输入内容: {},id为{}", task, task_list_id);
     let mut conn = state.db.lock().unwrap();
     add_task(&mut conn, task, task_list_id).unwrap();
 }

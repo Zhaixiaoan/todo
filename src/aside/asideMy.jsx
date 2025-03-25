@@ -1,18 +1,8 @@
 import React from "react";
 import { Menu, Dropdown } from "antd";
-import {
-	UploadOutlined,
-	BarChartOutlined,
-	PlusOutlined,
-} from "@ant-design/icons";
-// 左侧下层菜单项
-const leftBottomItems = [UploadOutlined, BarChartOutlined].map(
-	(icon, index) => ({
-		key: `left-bottom-${index + 1}`,
-		icon: React.createElement(icon),
-		label: `Bottom ${index + 1}`,
-	})
-);
+import { invoke } from "@tauri-apps/api/core";
+import { BarChartOutlined, PlusOutlined } from "@ant-design/icons";
+// // 左侧下层菜单项
 
 const contextMenu = (
 	<Menu>
@@ -21,14 +11,36 @@ const contextMenu = (
 		<Menu.Item key="delete">删除</Menu.Item>
 	</Menu>
 );
+
 export default function AsideMy() {
-	const [items, setItems] = React.useState(leftBottomItems);
 	const [editingKey, setEditingKey] = React.useState(null);
+	const [items, setItems] = React.useState(null);
+
+	// 新增：获取列表数据
+	React.useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const responses = await invoke("get_my_items");
+				console.log("请求数据：", responses);
+				const formattedItems = responses.map((item, index) => ({
+					key: item.id,
+					label: item.task_name,
+					icon: React.createElement(BarChartOutlined),
+					editable: false,
+				}));
+				setItems(formattedItems);
+			} catch (error) {
+				console.error("请求错误:", error);
+			}
+		};
+		fetchData();
+	}, []);
 
 	const handleAdd = () => {
+		const timestamp = Date.now();
 		const newItem = {
-			key: `new-item-${Date.now()}`,
-			label: "",
+			key: timestamp,
+			label: "新建列表",
 			icon: React.createElement(BarChartOutlined),
 			editable: true,
 		};
@@ -49,7 +61,17 @@ export default function AsideMy() {
 		const item = items.find((item) => item.key === key);
 		if (item && !item.label.trim()) {
 			setItems(items.filter((item) => item.key !== key));
+			return;
 		}
+		try {
+			const task = {
+				id: key,
+				task_name: item.label,
+				is_have: 0,
+			};
+			invoke("update_my_items", { task });
+			console.log("到这里来");
+		} catch (error) {}
 	};
 
 	const lastItems = [
@@ -71,25 +93,26 @@ export default function AsideMy() {
 						defaultSelectedKeys={["left-bottom-1"]}
 						icon={React.createElement(BarChartOutlined)}
 					>
-						{items.map((item) => (
-							<Menu.Item key={item.key} icon={item.icon}>
-								{editingKey === item.key ? (
-									<input
-										autoFocus
-										value={item.label}
-										onChange={(e) => handleEdit(e, item.key)}
-										onBlur={() => handleBlur(item.key)}
-										onKeyPress={(e) => {
-											if (e.key === "Enter") {
-												handleBlur(item.key);
-											}
-										}}
-									/>
-								) : (
-									item.label
-								)}
-							</Menu.Item>
-						))}
+						{items &&
+							items.map((item) => (
+								<Menu.Item key={item.key} icon={item.icon}>
+									{editingKey === item.key ? (
+										<input
+											autoFocus
+											value={item.label}
+											onChange={(e) => handleEdit(e, item.key)}
+											onBlur={() => handleBlur(item.key)}
+											onKeyPress={(e) => {
+												if (e.key === "Enter") {
+													handleBlur(item.key);
+												}
+											}}
+										/>
+									) : (
+										item.label
+									)}
+								</Menu.Item>
+							))}
 					</Menu>
 				</Dropdown>
 			</div>

@@ -1,9 +1,9 @@
+mod handers;
 mod models;
-mod service;
 
+use handers::*;
 use models::*;
 use rusqlite::Connection;
-use service::*;
 use std::sync::Mutex;
 use tauri::ipc::Response;
 use tracing::{info, level_filters::LevelFilter};
@@ -48,6 +48,7 @@ pub fn run() {
 #[tauri::command]
 fn get_my_items(state: tauri::State<AppState>) -> Response {
     // 这里可以从数据库或文件读取数据
+    info!("数据进来了");
     let conn = state.db.lock().unwrap();
     let task_list = get_task_list(&conn);
     tauri::ipc::Response::new(serde_json::to_string(&task_list).unwrap())

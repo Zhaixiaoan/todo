@@ -16,6 +16,7 @@ export default function Bottom({ onAddInput, listId }) {
 			setInputValue("");
 		}
 	};
+	
 	return (
 		<Input
 			value={inputValue}
